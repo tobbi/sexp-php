@@ -6,7 +6,7 @@
     },
     "autoload": {
         "psr-4": {
-            "DrSlump\\": "library/DrSlump",
+            "DrSlump\\": "library/DrSlump"
         }
     }
 }
