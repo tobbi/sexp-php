@@ -17,6 +17,9 @@ class Sexp
     // Set to false to disable pretty printing when serializing
     protected $pretty = true;
 
+    // Set to true to force strings to be escaped with double-quotes
+    protected $forcedStringEscape = false;
+
     // This regexp is used to tokenize the s-expression
     protected $regexp = '
         /   \(
@@ -67,6 +70,22 @@ class Sexp
     public function setCastNumbers($flag = true)
     {
         $this->castNumbers = (bool)$flag;
+    }
+
+    /**
+     * Check if forced string escape is enabled
+     */
+    public function getForcedStringEscape()
+    {
+        return (bool)$this->forcedStringEscape;
+    }
+
+    /**
+     * Set forced escaping of string values
+     */
+    public function setForcedStringEscape($flag = false)
+    {
+        $this->forcedStringEscape = (bool)$flag;
     }
 
     /**
@@ -227,7 +246,7 @@ class Sexp
         }
 
         // Check for non-symbol characters
-        if (preg_match('/[^A-Za-z0-9_\.\:\/\*\+\-\=]/', $value)) {
+        if (preg_match('/[^A-Za-z0-9_\.\:\/\*\+\-\=]/', $value) || $this->forcedStringEscape) {
             return '"' . addcslashes($value, '\\"') . '"';
         }
 
