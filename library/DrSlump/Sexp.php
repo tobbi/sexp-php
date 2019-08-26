@@ -200,6 +200,8 @@ class Sexp
             $array = array($array);
         }
 
+        $item_idx = 0;
+
         foreach ($array as $item) {
             if (is_array($item)) {
                 $out[] = $this->serialize($item, $indent+1);
@@ -212,16 +214,17 @@ class Sexp
             } else if (is_null($item)) {
                 $out[] = '""';
             } else if (is_string($item)) {
-                $out[] = $this->serializeString($item);
+                $out[] = $this->serializeString($item, $item_idx);
             } else if (is_object($item)) {
                 if ($item instanceof Traversable) {
                     $out[] = $this->serialize($item, $indent+1);
                 } else {
-                    $out[] = $this->serializeString((string)$item);
+                    $out[] = $this->serializeString((string)$item, $item_idx);
                 }
             } else {
                 throw new \RuntimeException('Unable to serialize value of type ' . gettype($item));
             }
+            $item_idx++;
         }
 
         $out = '(' . implode(' ', $out) . ')';
@@ -238,7 +241,7 @@ class Sexp
      * @param string $value
      * @return string
      */
-    protected function serializeString($value)
+    protected function serializeString($value, $item_idx = 0)
     {
         // Check non printable
         if (preg_match('/[^\x20-\x7e\s]/', $value)) {
@@ -246,7 +249,7 @@ class Sexp
         }
 
         // Check for non-symbol characters
-        if (preg_match('/[^A-Za-z0-9_\.\:\/\*\+\-\=]/', $value) || $this->forcedStringEscape) {
+        if (preg_match('/[^A-Za-z0-9_\.\:\/\*\+\-\=]/', $value) || ($this->forcedStringEscape && $item_idx > 0)) {
             return '"' . addcslashes($value, '\\"') . '"';
         }
 
